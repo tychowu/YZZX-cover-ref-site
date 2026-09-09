@@ -1,4 +1,98 @@
-<!DOCTYPE html>
+#!/usr/bin/env node
+/**
+ * build.mjs — 从 YZZX-cover 技能的 styles/ 目录同步生成封面风格参考库网站。
+ * 用法: node build.mjs
+ * 依赖: macOS sips（图片转换），无需 npm 依赖。
+ */
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+import url from 'node:url';
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+// --- 路径配置 ---
+const STYLE_DIR = '/Users/tychowu/WorkBuddy/YZZX-xhs-cover/.workbuddy/skills/YZZX-cover/references/styles';
+const SITE_ROOT = __dirname;
+const COVER_SRC = path.join(STYLE_DIR, 'approved-examples');
+const REF_SRC   = path.join(STYLE_DIR, 'source-references');
+const COVER_DST = path.join(SITE_ROOT, 'assets', 'covers');
+const REF_DST   = path.join(SITE_ROOT, 'assets', 'source');
+
+// --- 工具函数 ---
+const exts = ['.jpg', '.jpeg', '.png', '.webp', '.JPG', '.PNG'];
+function findCover(name) {
+  for (const e of exts) {
+    const p = path.join(COVER_SRC, name + e);
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+function naturalKey(s) {
+  return s.replace(/(\d+)/g, m => m.padStart(12, '0'));
+}
+function convert(src, dst, maxDim, quality) {
+  fs.mkdirSync(path.dirname(dst), { recursive: true });
+  try {
+    execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', String(quality), '-Z', String(maxDim), src, '--out', dst], { stdio: 'ignore' });
+    return true;
+  } catch (e) {
+    console.error('  ✗ sips 失败:', src, e.message);
+    return false;
+  }
+}
+function shortDesc(prompt) {
+  if (!prompt) return '';
+  const one = String(prompt).replace(/\s+/g, ' ').trim();
+  return one.length > 24 ? one.slice(0, 24) + '…' : one;
+}
+
+// --- 1. 读取所有风格 JSON ---
+const jsonFiles = fs.readdirSync(STYLE_DIR).filter(f => f.endsWith('.json')).sort();
+const styles = [];
+let totalRefs = 0;
+
+for (const jf of jsonFiles) {
+  const id = jf.replace(/\.json$/, '');
+  const data = JSON.parse(fs.readFileSync(path.join(STYLE_DIR, jf), 'utf8'));
+  const name = data.name || id;
+  const desc = shortDesc(data.prompt);
+
+  // 封面（已确认示意图）
+  const coverSrc = findCover(name);
+  const coverDst = path.join(COVER_DST, id + '.jpg');
+  let hasCover = false;
+  if (coverSrc) hasCover = convert(coverSrc, coverDst, 1400, 82);
+  if (!hasCover) console.warn('  ! 缺封面:', name, '(' + id + ')');
+
+  // 参考图（source-references/<id>/）
+  const refDir = path.join(REF_SRC, id);
+  let refs = [];
+  if (fs.existsSync(refDir) && fs.statSync(refDir).isDirectory()) {
+    refs = fs.readdirSync(refDir)
+      .filter(f => exts.includes(path.extname(f)))
+      .sort((a, b) => naturalKey(a).localeCompare(naturalKey(b)));
+  }
+  let refCount = 0;
+  refs.forEach((rf, i) => {
+    const n = i + 1;
+    if (convert(path.join(refDir, rf), path.join(REF_DST, id, n + '.jpg'), 1200, 80)) refCount++;
+  });
+  if (refCount === 0) console.warn('  ! 缺参考图:', id);
+  totalRefs += refCount;
+
+  styles.push({ id, name, desc, refs: refCount });
+}
+
+// 仅保留有封面的风格
+const finalStyles = styles.filter(s => fs.existsSync(path.join(COVER_DST, s.id + '.jpg')));
+finalStyles.sort((a, b) => a.id.localeCompare(b.id));
+
+console.log(`已处理 ${finalStyles.length} 个风格，共 ${totalRefs} 张参考图`);
+
+// --- 2. 生成 index.html ---
+const stylesJSON = JSON.stringify(finalStyles);
+const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
@@ -100,8 +194,8 @@
       <h1>先看<span class="g">效果</span>，再定风格</h1>
       <p>这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意一张封面，即可平铺查看该风格的学习参考图，方便你在生成前快速挑选最合适的方向。</p>
       <div class="stats">
-        <div class="stat"><b>16</b><span>已确认风格</span></div>
-        <div class="stat"><b>72</b><span>学习参考图</span></div>
+        <div class="stat"><b>${finalStyles.length}</b><span>已确认风格</span></div>
+        <div class="stat"><b>${totalRefs}</b><span>学习参考图</span></div>
         <div class="stat"><b>3:4</b><span>标准封面比例</span></div>
       </div>
     </section>
@@ -138,7 +232,7 @@
   <div class="zoom" id="zoom"><img id="zoomImg" src="" alt="" /></div>
 
 <script>
-  const STYLES = [{"id":"black-yellow-sticker","name":"黑黄贴纸","desc":"小红书竖版封面，严格 3:4。风格为“黑黄贴纸”…","refs":5},{"id":"blue-shirt-knowledge","name":"蓝衫知识","desc":"小红书竖版知识型 IP 封面，严格 3:4 画布…","refs":4},{"id":"casual-hand-drawn","name":"随性手绘","desc":"小红书竖版封面，严格 3:4。风格为“随性手绘”…","refs":5},{"id":"cream-bounce-type","name":"奶油跳字","desc":"小红书竖版人物主题海报，严格 3:4。整体是奶油…","refs":5},{"id":"cream-giant-type","name":"奶油巨字","desc":"小红书竖版人物观点封面，严格 3:4。适用于商业…","refs":3},{"id":"dopamine-song","name":"多巴胺宋","desc":"小红书竖版封面，严格 3:4。风格为“多巴胺宋”…","refs":3},{"id":"dynamic-color-motion","name":"潮色动势","desc":"小红书竖版封面，严格 3:4。风格为“潮色动势”…","refs":5},{"id":"fluorescent-explainer","name":"荧光讲解","desc":"小红书竖版知识讲解 / AI 工具 / 职场成长…","refs":5},{"id":"fresh-doodle","name":"清爽涂鸦","desc":"小红书竖版轻知识人物封面，严格 3:4。整体是清…","refs":5},{"id":"golden-brown-expert","name":"金棕解读","desc":"小红书竖版财经/趋势专家口播封面，严格 3:4。…","refs":4},{"id":"hardcore-finance","name":"硬核财经","desc":"小红书竖版财经解释封面，严格 3:4。适用于金融…","refs":5},{"id":"high-energy-tech","name":"高能科技","desc":"小红书竖版 AI / 创作工具 / Agent …","refs":4},{"id":"retro-little-finance","name":"复古小财","desc":"小红书竖版轻财经 / 消费观察 / 成长思考封面…","refs":5},{"id":"skill-blast","name":"暗域科技","desc":"小红书竖版封面，3:4。风格为“暗域科技”：近黑…","refs":5},{"id":"torn-paper-wander","name":"撕纸漫游","desc":"小红书竖版封面，严格 3:4。风格为“撕纸漫游”…","refs":5},{"id":"yellow-white-burst-type","name":"黄白爆字","desc":"小红书竖版封面，严格 3:4。风格为“黄白爆字”…","refs":4}];
+  const STYLES = ${stylesJSON};
   const grid = document.getElementById('grid');
   STYLES.forEach((s, i) => {
     const card = document.createElement('article');
@@ -188,4 +282,7 @@
   });
 </script>
 </body>
-</html>
+</html>`;
+
+fs.writeFileSync(path.join(SITE_ROOT, 'index.html'), html, 'utf8');
+console.log('已生成 index.html（' + finalStyles.length + ' 风格 / ' + totalRefs + ' 参考图）');
