@@ -142,8 +142,6 @@ const html = `<!DOCTYPE html>
   .nav .brand b{font-size:18px;letter-spacing:.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
   .nav .brand span{display:block;font-size:11.5px;color:var(--ink-3);letter-spacing:1px}
   .nav .spacer{flex:1}
-  .pill{font-size:12.5px;color:var(--ink-2);border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;display:inline-flex;align-items:center;gap:7px}
-  .pill i{width:7px;height:7px;border-radius:50%;background:var(--grad)}
   .hero{padding:56px 0 26px;text-align:left}
   .hero .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);background:#fff;border:1px solid var(--line);padding:6px 14px;border-radius:999px;box-shadow:var(--shadow-sm)}
   .hero .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--grad)}
@@ -164,13 +162,15 @@ const html = `<!DOCTYPE html>
   .thumb{position:relative;aspect-ratio:3/4;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--bg-2)}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
   .card:hover .thumb img{transform:scale(1.06)}
-  .veil{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;padding:14px;background:linear-gradient(180deg,transparent 45%,rgba(10,14,22,.78) 100%);opacity:0;transition:opacity .35s}
+  .veil{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;justify-content:flex-end;padding:14px;background:linear-gradient(180deg,transparent 45%,rgba(10,14,22,.78) 100%);opacity:0;transition:opacity .35s}
   .card:hover .veil{opacity:1}
   .veil .cta{color:#fff;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transform:translateY(10px);transition:transform .35s}
+  .veil .cta{color:#fff;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;background:linear-gradient(120deg,#15c96b,#13b6cf 55%,#2f6bff);padding:7px 13px;border-radius:999px;box-shadow:0 6px 18px rgba(19,182,207,.42);transform:translateY(10px);transition:transform .35s,box-shadow .35s}
   .card:hover .veil .cta{transform:translateY(0)}
   .meta{padding:14px 16px 16px} .meta h3{margin:0;font-size:17px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
   .meta h3 .en{font-size:11px;color:var(--ink-3);font-weight:600;letter-spacing:.4px;background:var(--bg-2);border:1px solid var(--line);padding:2px 7px;border-radius:6px}
-  .meta p{margin:7px 0 0;font-size:12.5px;line-height:1.55;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+  .meta p{margin:7px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-2)}
+  .meta p .ln{display:block}
   .meta .foot{margin-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-3)}
   .meta .foot .view{color:transparent;background:var(--grad);-webkit-background-clip:text;background-clip:text;font-weight:700;opacity:0;transform:translateX(-6px);transition:.3s}
   .card:hover .meta .foot .view{opacity:1;transform:translateX(0)}
@@ -227,7 +227,6 @@ const html = `<!DOCTYPE html>
       <img class="logo" src="assets/logo.png" alt="言直在线" />
       <div class="brand"><b>言直在线</b><span>封面风格参考库 · YZZX-COVER</span></div>
       <div class="spacer"></div>
-      <span class="pill"><i></i>选风格前先来这里对照参考</span>
     </div>
   </header>
 
@@ -296,6 +295,7 @@ const html = `<!DOCTYPE html>
   STYLES.forEach((s, i) => {
     const card = document.createElement('article');
     card.className = 'card'; card.style.setProperty('--i', i);
+    const descHtml = (s.usecase || s.desc).split('\n').map(function(l){ return '<span class="ln">' + l + '</span>'; }).join('');
     card.innerHTML =
       '<div class="thumb">' +
         '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 封面" />' +
@@ -303,8 +303,7 @@ const html = `<!DOCTYPE html>
       '</div>' +
       '<div class="meta">' +
         '<h3>' + s.name + ' <span class="en">' + s.id + '</span></h3>' +
-        '<p>' + (s.usecase || s.desc) + '</p>' +
-        '<div class="foot"><span class="view">点击看大图 →</span></div>' +
+        '<p>' + descHtml + '</p>' +
       '</div>';
     card.addEventListener('click', () => openCover(s));
     grid.appendChild(card);
