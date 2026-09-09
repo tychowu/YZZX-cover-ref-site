@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="kuI29jmiBSpNGshsCU0xZ7">
+<head data-page-node-id="IV71f9GmbJjMpxW3HVErGC">
+<meta charset="UTF-8" data-page-node-id="M0DXrv9fVevvNgd5zYWXN4" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="McW49vdmVtUxju31RTF5jo" />
+<title>言直在线 · 封面风格参考库</title>
+<meta name="description" content="YZZX-cover 技能已确认的封面风格示意图与学习参考图，方便选风格时对照。" data-page-node-id="MZ4lwWJuwbraU7EWA5TwGG" />
+<style>
+  :root{
+    --bg:#f6f8fb;
+    --bg-2:#eef2f7;
+    --card:#ffffff;
+    --ink:#14171c;
+    --ink-2:#5b6372;
+    --ink-3:#98a0ad;
+    --line:#e6e9f0;
+    --green:#15c96b;
+    --teal:#13b6cf;
+    --blue:#2f6bff;
+    --violet:#a01fe0;
+    --grad:linear-gradient(120deg,#15c96b 0%,#13b6cf 30%,#2f6bff 64%,#a01fe0 100%);
+    --shadow-sm:0 1px 2px rgba(18,25,38,.06),0 4px 14px rgba(18,25,38,.06);
+    --shadow-lg:0 10px 30px rgba(18,25,38,.16),0 24px 60px rgba(18,25,38,.14);
+    --r:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1000px 520px at 88% -10%,rgba(160,31,224,.12),transparent 60%),
+      radial-gradient(900px 500px at -8% -6%,rgba(21,201,107,.13),transparent 55%),
+      radial-gradient(700px 420px at 50% 0%,rgba(19,182,207,.08),transparent 60%),
+      var(--bg);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky;top:0;z-index:40;
+    backdrop-filter:saturate(1.4) blur(12px);
+    background:rgba(246,248,251,.78);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;gap:13px;height:72px}
+  .nav img.logo{height:48px;width:auto;display:block;mix-blend-mode:multiply}
+  .nav .brand{line-height:1.12}
+  .nav .brand b{font-size:18px;letter-spacing:.5px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .nav .brand span{display:block;font-size:11.5px;color:var(--ink-3);letter-spacing:1px}
+  .nav .spacer{flex:1}
+  .pill{
+    font-size:12.5px;color:var(--ink-2);
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:7px 14px;display:inline-flex;align-items:center;gap:7px;
+  }
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--grad)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:56px 0 26px;text-align:left}
+  .hero .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+    color:var(--ink-2);background:#fff;border:1px solid var(--line);
+    padding:6px 14px;border-radius:999px;box-shadow:var(--shadow-sm)
+  }
+  .hero .eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--grad)}
+  .hero h1{font-size:clamp(30px,4.4vw,46px);line-height:1.15;margin:18px 0 10px;font-weight:900;letter-spacing:.5px}
+  .hero h1 .g{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{max-width:680px;color:var(--ink-2);font-size:16px;margin:0 0 22px}
+  .stats{display:flex;gap:12px;flex-wrap:wrap}
+  .stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 18px;box-shadow:var(--shadow-sm)}
+  .stat b{font-size:22px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat span{display:block;font-size:12px;color:var(--ink-3);margin-top:2px}
+
+  /* ---------- grid ---------- */
+  .section-head{display:flex;align-items:end;justify-content:space-between;margin:30px 0 18px}
+  .section-head h2{font-size:20px;margin:0;letter-spacing:.5px}
+  .section-head small{color:var(--ink-3)}
+  .grid{display:grid;gap:20px;padding-bottom:70px;grid-template-columns:repeat(auto-fill,minmax(235px,1fr))}
+  .card{
+    position:relative;border-radius:var(--r);cursor:pointer;
+    background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow-sm);
+    transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s,border-color .35s;
+    opacity:0;transform:translateY(18px);
+    animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay:calc(var(--i) * 60ms);
+  }
+  @keyframes rise{to{opacity:1;transform:translateY(0)}}
+  .card::before{
+    content:"";position:absolute;inset:-2px;border-radius:calc(var(--r) + 2px);
+    padding:2px;background:var(--grad);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    opacity:0;transition:opacity .35s;pointer-events:none;z-index:2;
+  }
+  .card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg)}
+  .card:hover::before{opacity:1}
+  .thumb{position:relative;aspect-ratio:3/4;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--bg-2)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
+  .card:hover .thumb img{transform:scale(1.06)}
+  .count{
+    position:absolute;top:12px;right:12px;z-index:3;
+    font-size:12px;font-weight:700;color:#fff;background:rgba(20,23,28,.72);
+    border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);
+    padding:5px 10px;border-radius:999px;
+  }
+  .veil{
+    position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;padding:14px;
+    background:linear-gradient(180deg,transparent 45%,rgba(10,14,22,.78) 100%);
+    opacity:0;transition:opacity .35s;
+  }
+  .card:hover .veil{opacity:1}
+  .veil .cta{
+    color:#fff;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;
+    transform:translateY(10px);transition:transform .35s;
+  }
+  .card:hover .veil .cta{transform:translateY(0)}
+  .veil .cta .dot{width:8px;height:8px;border-radius:50%;background:var(--grad)}
+  .meta{padding:14px 16px 16px}
+  .meta h3{margin:0;font-size:17px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+  .meta h3 .en{font-size:11px;color:var(--ink-3);font-weight:600;letter-spacing:.4px;background:var(--bg-2);border:1px solid var(--line);padding:2px 7px;border-radius:6px}
+  .meta p{margin:6px 0 0;font-size:13px;color:var(--ink-2)}
+  .meta .foot{margin-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-3)}
+  .meta .foot .view{color:transparent;background:var(--grad);-webkit-background-clip:text;background-clip:text;font-weight:700;opacity:0;transform:translateX(-6px);transition:.3s}
+  .card:hover .meta .foot .view{opacity:1;transform:translateX(0)}
+
+  /* ---------- lightbox (tiled refs) ---------- */
+  .lb{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  .lb.open{display:flex}
+  .lb-backdrop{position:absolute;inset:0;background:rgba(12,16,24,.82);backdrop-filter:blur(8px);opacity:0;transition:opacity .3s}
+  .lb.show .lb-backdrop{opacity:1}
+  .lb-dialog{
+    position:relative;z-index:2;width:min(1080px,96vw);max-height:92vh;overflow:auto;
+    background:#fff;border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.5);
+    transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.7,.3,1),opacity .3s;
+  }
+  .lb.show .lb-dialog{transform:translateY(0) scale(1);opacity:1}
+  .lb-head{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:16px 20px;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .lb-head .tt{display:flex;flex-direction:column}
+  .lb-head .tt b{font-size:19px;letter-spacing:.5px}
+  .lb-head .tt span{font-size:12px;color:var(--ink-3)}
+  .lb-head .grow{flex:1}
+  .lb-tag{font-size:11.5px;font-weight:700;color:#fff;background:var(--grad);padding:4px 10px;border-radius:999px}
+  .lb-close{width:38px;height:38px;border:none;border-radius:50%;background:var(--bg-2);color:var(--ink);font-size:22px;line-height:1;cursor:pointer;transition:.25s}
+  .lb-close:hover{background:var(--grad);color:#fff;transform:rotate(90deg)}
+  .lb-body{padding:20px}
+  .lb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+  .tile{
+    position:relative;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--bg-2);
+    border:1px solid var(--line);cursor:zoom-in;
+    opacity:0;transform:translateY(14px);
+    animation:rise .5s cubic-bezier(.2,.7,.3,1) forwards;
+    animation-delay:calc(var(--i) * 50ms);
+    transition:transform .3s,box-shadow .3s;
+  }
+  .tile:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+  .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+  .tile:hover img{transform:scale(1.05)}
+  .tile .num{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:#fff;background:rgba(20,23,28,.7);padding:3px 8px;border-radius:999px}
+  .lb-note{padding:16px 20px 20px;color:var(--ink-3);font-size:12.5px}
+
+  /* ---------- single-image zoom (no arrows) ---------- */
+  .zoom{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,14,22,.92);backdrop-filter:blur(8px);cursor:zoom-out;padding:24px}
+  .zoom.open{display:flex;animation:zoomfade .25s ease}
+  @keyframes zoomfade{from{opacity:0}to{opacity:1}}
+  .zoom img{max-width:94vw;max-height:92vh;border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.6);display:block}
+
+  footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);font-size:13px}
+  footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+  footer img{height:32px;mix-blend-mode:multiply}
+
+  @media (max-width:560px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+    .meta h3{font-size:15px}
+    .hero{padding:40px 0 18px}
+    .lb-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  }
+</style>
+</head>
+<body data-page-node-id="8b1CpBp9cGf6T5tz9p7Ldb">
+  <header data-page-node-id="kMcNawPSggYYbXne5d0H1e">
+    <div class="wrap nav" data-page-node-id="mJquGYWV8T3SPyMVejEC8J">
+      <img class="logo" src="assets/logo.png" alt="言直在线" data-page-node-id="4HVwlOvn4OWgKVvMLuMhFb" />
+      <div class="brand" data-page-node-id="vsuuyBCBzu5xLEfTmcUH2t"><b data-page-node-id="AIwsRwRFjku2eNLuS4ZCJL">言直在线</b><span data-page-node-id="03HNEPTJ0nciFBOhp1Aap5">封面风格参考库 · YZZX-COVER</span></div>
+      <div class="spacer" data-page-node-id="8RK2H5utaUp1CaXv1Jb8CZ"></div>
+      <span class="pill" data-page-node-id="BigAC3Sj8os1r1nXy0c8nr"><i data-page-node-id="VwG3Ieqtx64aCEAoI4hBgK"></i>选风格前先来这里对照参考</span>
+    </div>
+  </header>
+
+  <main class="wrap" data-page-node-id="4lSUsCEEAMGJBFrFWz5uUR">
+    <section class="hero" data-page-node-id="ZD6S6lfq46IK71eL8WM0O7">
+      <span class="eyebrow" data-page-node-id="YTQ3eI22Gm3FoI0UUxa0py"><i data-page-node-id="mSugOFolHkfPIR7jAo8pJy"></i>言直在线 · 已确认封面风格</span>
+      <h1 data-page-node-id="yj5U8dg7ghpgOZJ2PSAuGX">先看<span class="g" data-page-node-id="FHB9GGjTVehLMaWGcVpvun">效果</span>，再定风格</h1>
+      <p data-page-node-id="LqZDYClXYTCxeCjebDo5mY">这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意一张封面，即可平铺查看该风格的学习参考图，方便你在生成前快速挑选最合适的方向。</p>
+      <div class="stats" data-page-node-id="MU2zdv9pSzYVCjvDzauZJj">
+        <div class="stat" data-page-node-id="3s1yeC59ONz6O1jxAjrGFN"><b data-page-node-id="2QYW0VE1tTBI55zsysOfVh">12</b><span data-page-node-id="ixesEi42v9jPlUBxEGUPN5">已确认风格</span></div>
+        <div class="stat" data-page-node-id="JAsJUzUW7bzCw6ofqGa0fy"><b data-page-node-id="vW86uHLMsh63zRJjWZUb1A">55</b><span data-page-node-id="99Ivwy0kaAdFuXF7ZD7qy8">学习参考图</span></div>
+        <div class="stat" data-page-node-id="L3qPM5Qur3Os6yGO9GrKU3"><b data-page-node-id="NF6WDiP1TaAsaJjxk9EGf0">3:4</b><span data-page-node-id="VxwQttq7Bf3csnRtjCoWX4">标准封面比例</span></div>
+      </div>
+    </section>
+
+    <div class="section-head" data-page-node-id="KZ7psVwCgKVufCAQ7kqT8B">
+      <h2 data-page-node-id="vbcPRXg3b03Q3GFutKXyKj">全部风格</h2>
+      <small data-page-node-id="FKSqfLRvPXg6PYpAL9pock">默认展示「已确认示意图」，点开平铺查看参考图</small>
+    </div>
+
+    <section class="grid" id="grid" data-page-node-id="5USqqoDlYOb9NwXMYGWG9Z"></section>
+  </main>
+
+  <footer data-page-node-id="q9oFqkYXQTjGv2i0FFfFG5">
+    <div class="wrap" data-page-node-id="VNBGofe6ICbYSw9nHCfBLB">
+      <img src="assets/logo.png" alt="言直在线" data-page-node-id="S8BjqBbDM1AUlvDueGmnaR" />
+      <span data-page-node-id="KHR0XbodjyiIDt29erWF0u">言直在线 · YZZX-cover 封面风格参考库 · 仅供内部选风格参考</span>
+    </div>
+  </footer>
+
+  <!-- lightbox: tiled reference images only -->
+  <div class="lb" id="lb" aria-hidden="true" data-page-node-id="k7l4baRhGch4ifllTKm79Q">
+    <div class="lb-backdrop" id="lbBackdrop" data-page-node-id="TuWezjUTPMO0G18HDCTnW6"></div>
+    <div class="lb-dialog" role="dialog" aria-modal="true" data-page-node-id="rQw0DGMJlBwLVgatBtw6CF">
+      <div class="lb-head" data-page-node-id="e7LI6bPm1UlMnTeFjPLOlb">
+        <div class="tt" data-page-node-id="1az8GCrb87VCl1B5ivZFKx">
+          <b id="lbName" data-page-node-id="kfTG7pBKo2d3ocbXCgkbie">风格名称</b>
+          <span id="lbEn" data-page-node-id="JzSBIu8a7btCgUnVDP0kzV">style-id</span>
+        </div>
+        <span class="lb-tag" id="lbTag" data-page-node-id="c0fZS11i63FEpHIoeVoGHj"></span>
+        <div class="grow" data-page-node-id="eSEmXV2zG2o2ORzlU0c6vc"></div>
+        <button class="lb-close" id="lbClose" aria-label="关闭" data-page-node-id="C2qgSaRGWSo5FLNai6Ey4v">×</button>
+      </div>
+      <div class="lb-body" data-page-node-id="lWMYf5H7qTuN8JtpbnUYAC">
+        <div class="lb-grid" id="lbGrid" data-page-node-id="HzEqpP95NxA2W3qtMfVUTh"></div>
+      </div>
+      <div class="lb-note" id="lbNote" data-page-node-id="MiB2qBQS46DeciWrgxUbeT"></div>
+    </div>
+  </div>
+
+  <!-- single image zoom -->
+  <div class="zoom" id="zoom" data-page-node-id="mG8Ps1JELy1XY5x0KBMMit"><img id="zoomImg" src="" alt="" data-page-node-id="lIGVuh5eh1iDwm68DtLdAO" /></div>
+
+<script>
+  const STYLES = [
+    { id:'dynamic-color-motion', name:'潮色动势', desc:'都市行动照片 · 潮色粗描边标题', refs:5 },
+    { id:'torn-paper-wander',   name:'撕纸漫游', desc:'现场底图 · 撕纸相框 · 拍立得', refs:5 },
+    { id:'casual-hand-drawn',   name:'随性手绘', desc:'现场照片 · 手写视频笔记', refs:5 },
+    { id:'black-yellow-sticker',name:'黑黄贴纸', desc:'真人讲解 · 黄黑撕纸贴纸海报', refs:5 },
+    { id:'blue-shirt-knowledge',name:'蓝衫知识', desc:'知识 IP 拆解 · 单色强调', refs:4 },
+    { id:'hardcore-finance',    name:'硬核财经', desc:'深色财经新闻海报', refs:5 },
+    { id:'cream-giant-type',    name:'奶油巨字', desc:'人物口播 · 奶油米白巨字', refs:3 },
+    { id:'golden-brown-expert', name:'金棕解读', desc:'高信任财经口播 · 金白标题', refs:4 },
+    { id:'high-energy-tech',    name:'高能科技', desc:'黑科技杂志 · 高信息密度', refs:4 },
+    { id:'retro-little-finance',name:'复古小财', desc:'低饱和纸纹财经专栏', refs:5 },
+    { id:'fluorescent-explainer',name:'荧光讲解',desc:'真人讲解 · 荧光巨字贴纸', refs:5 },
+    { id:'skill-blast',         name:'暗域科技', desc:'暗色高能故事海报', refs:5 }
+  ];
+
+  const grid = document.getElementById('grid');
+  STYLES.forEach((s, i) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.style.setProperty('--i', i);
+    card.innerHTML =
+      '<div class="thumb">' +
+        '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 已确认示意图" />' +
+        '<span class="count">' + s.refs + ' 参考</span>' +
+        '<div class="veil"><span class="cta"><span class="dot"></span>查看 ' + s.refs + ' 张参考图</span></div>' +
+      '</div>' +
+      '<div class="meta">' +
+        '<h3>' + s.name + ' <span class="en">' + s.id + '</span></h3>' +
+        '<p>' + s.desc + '</p>' +
+        '<div class="foot"><span>已确认示意图</span><span class="view">点开看参考 →</span></div>' +
+      '</div>';
+    card.addEventListener('click', () => openLightbox(s));
+    grid.appendChild(card);
+  });
+
+  // ---------- lightbox: tiled refs, no confirmed cover, no arrows ----------
+  const lb = document.getElementById('lb');
+  const lbName = document.getElementById('lbName');
+  const lbEn = document.getElementById('lbEn');
+  const lbTag = document.getElementById('lbTag');
+  const lbGrid = document.getElementById('lbGrid');
+  const lbNote = document.getElementById('lbNote');
+
+  function openLightbox(s){
+    lbName.textContent = s.name;
+    lbEn.textContent = s.id;
+    lbTag.textContent = s.refs + ' 张参考图';
+    lbNote.textContent = '以上为「' + s.name + '」的学习参考图（首页展示的已确认示意图不在此重复）。点击任意一张可放大查看。';
+    lbGrid.innerHTML = '';
+    for (let n = 1; n <= s.refs; n++){
+      const src = 'assets/source/' + s.id + '/' + n + '.jpg';
+      const t = document.createElement('div');
+      t.className = 'tile';
+      t.style.setProperty('--i', n - 1);
+      t.innerHTML = '<img loading="lazy" src="' + src + '" alt="' + s.name + ' 参考图 ' + n + '" />' +
+                    '<span class="num">参考 ' + n + '</span>';
+      t.addEventListener('click', () => openZoom(src, s.name + ' 参考图 ' + n));
+      lbGrid.appendChild(t);
+    }
+    lb.classList.add('open');
+    requestAnimationFrame(() => lb.classList.add('show'));
+    lb.setAttribute('aria-hidden','false');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(){
+    lb.classList.remove('show');
+    lb.setAttribute('aria-hidden','true');
+    document.body.style.overflow = '';
+    setTimeout(() => lb.classList.remove('open'), 280);
+  }
+  document.getElementById('lbClose').addEventListener('click', closeLightbox);
+  document.getElementById('lbBackdrop').addEventListener('click', closeLightbox);
+
+  // ---------- single zoom ----------
+  const zoom = document.getElementById('zoom');
+  const zoomImg = document.getElementById('zoomImg');
+  function openZoom(src, alt){ zoomImg.src = src; zoomImg.alt = alt; zoom.classList.add('open'); }
+  function closeZoom(){ zoom.classList.remove('open'); }
+  zoom.addEventListener('click', closeZoom);
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape'){
+      if (zoom.classList.contains('open')) closeZoom();
+      else if (lb.classList.contains('open')) closeLightbox();
+    }
+  });
+</script>
+</body>
+</html>
