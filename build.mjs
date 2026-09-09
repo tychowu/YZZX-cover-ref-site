@@ -47,6 +47,27 @@ function shortDesc(prompt) {
   return one.length > 24 ? one.slice(0, 24) + '…' : one;
 }
 
+// 每个风格“适合什么方向内容”的三行简介（key = 风格 id，值用 \n 分三行）。
+// 放在 build 脚本里，技能仓库重新 pull 也不会覆盖。
+const USE_CASES = {
+  'dynamic-color-motion': '适合潮流生活、好物种草与年轻向分享\n高饱和撞色与动态构图，吸睛力强\n适合笔记打卡、情绪表达类轻松内容',
+  'torn-paper-wander': '适合旅行游记、城市漫步与生活方式\n撕纸拼贴质感，营造随性探索氛围\n适合攻略合集、探店与慢生活分享',
+  'casual-hand-drawn': '适合个人成长、学习笔记与日常随笔\n手绘线条松弛自然，亲近感强\n适合知识碎片、复盘与轻量教程',
+  'black-yellow-sticker': '适合工具测评、效率技巧与干货分享\n黑黄高对比贴纸风，辨识度极高\n适合“本周玩了什么”类主播推荐',
+  'blue-shirt-knowledge': '适合知识博主、职场经验与专业科普\n真人出镜加蓝衫，建立信任人设\n适合方法论、避坑指南与行业解读',
+  'hardcore-finance': '适合财经解读、数据洞察与投资科普\n立体金属字与图表，专业硬核感强\n适合行情分析、研报拆解与财富内容',
+  'cream-giant-type': '适合观点金句、情绪文案与品牌主张\n奶油底色加超大标题，醒目又温和\n适合治愈系、生活态度类短内容',
+  'golden-brown-expert': '适合专家访谈、深度长文与观点输出\n金棕质感沉稳高级，权威感强\n适合行业洞察、人物专访与评论',
+  'high-energy-tech': '适合科技资讯、产品发布与极客内容\n高能量光效与未来感，冲击力足\n适合发布会、数码测评与新趋势',
+  'retro-little-finance': '适合理财科普、攒钱记录与财商内容\n复古暖调小画风，亲和易读\n适合记账打卡、省钱技巧与入门投教',
+  'fluorescent-explainer': '适合教程讲解、步骤拆解与功能演示\n荧光强调重点，信息层级清晰\n适合软件教学、使用技巧与操作指南',
+  'skill-blast': '适合技能盘点、工具合集与效率爆发\n爆炸式视觉，突出“收获感”\n适合周报、宝藏清单与能力安利',
+  'dopamine-song': '适合音乐分享、歌单推荐与情绪内容\n多巴胺配色明快，愉悦感强\n适合听歌笔记、氛围歌单与治愈向',
+  'fresh-doodle': '适合生活碎片、灵感记录与轻量分享\n清爽涂鸦风，干净不拥挤\n适合日常打卡、清单与小确幸',
+  'yellow-white-burst-type': '适合爆款标题、强观点与种草短文\n黄白爆字冲击力强，第一眼抓人\n适合热点解读、金句与引流内容',
+  'cream-bounce-type': '适合活泼教程、亲子内容与轻松科普\n奶油跳动字，灵动有节奏\n适合知识动画、趣味讲解与互动'
+};
+
 // --- 1. 读取所有风格 JSON ---
 const jsonFiles = fs.readdirSync(STYLE_DIR).filter(f => f.endsWith('.json')).sort();
 const styles = [];
@@ -81,7 +102,7 @@ for (const jf of jsonFiles) {
   if (refCount === 0) console.warn('  ! 缺参考图:', id);
   totalRefs += refCount;
 
-  styles.push({ id, name, desc, refs: refCount });
+  styles.push({ id, name, desc, useCase: USE_CASES[id] || '', refs: refCount });
 }
 
 // 仅保留有封面的风格
@@ -143,14 +164,13 @@ const html = `<!DOCTYPE html>
   .thumb{position:relative;aspect-ratio:3/4;border-radius:var(--r) var(--r) 0 0;overflow:hidden;background:var(--bg-2)}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .55s cubic-bezier(.2,.7,.3,1)}
   .card:hover .thumb img{transform:scale(1.06)}
-  .count{position:absolute;top:12px;right:12px;z-index:3;font-size:12px;font-weight:700;color:#fff;background:rgba(20,23,28,.72);border:1px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);padding:5px 10px;border-radius:999px}
   .veil{position:absolute;inset:0;z-index:3;display:flex;align-items:flex-end;padding:14px;background:linear-gradient(180deg,transparent 45%,rgba(10,14,22,.78) 100%);opacity:0;transition:opacity .35s}
   .card:hover .veil{opacity:1}
   .veil .cta{color:#fff;font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transform:translateY(10px);transition:transform .35s}
-  .card:hover .veil .cta{transform:translateY(0)} .veil .cta .dot{width:8px;height:8px;border-radius:50%;background:var(--grad)}
+  .card:hover .veil .cta{transform:translateY(0)}
   .meta{padding:14px 16px 16px} .meta h3{margin:0;font-size:17px;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
   .meta h3 .en{font-size:11px;color:var(--ink-3);font-weight:600;letter-spacing:.4px;background:var(--bg-2);border:1px solid var(--line);padding:2px 7px;border-radius:6px}
-  .meta p{margin:6px 0 0;font-size:13px;color:var(--ink-2)}
+  .meta p{margin:7px 0 0;font-size:12.5px;line-height:1.55;color:var(--ink-2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
   .meta .foot{margin-top:12px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-3)}
   .meta .foot .view{color:transparent;background:var(--grad);-webkit-background-clip:text;background-clip:text;font-weight:700;opacity:0;transform:translateX(-6px);transition:.3s}
   .card:hover .meta .foot .view{opacity:1;transform:translateX(0)}
@@ -189,7 +209,16 @@ const html = `<!DOCTYPE html>
   footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);font-size:13px}
   footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
   footer img{height:32px;mix-blend-mode:multiply}
-  @media (max-width:560px){.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}.meta h3{font-size:15px}.hero{padding:40px 0 18px}.lb-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}}
+  @media (max-width:560px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+    .meta{padding:10px 12px 12px}
+    .meta h3{font-size:15px}
+    .meta h3 .en{display:none}
+    .meta p{display:none}
+    .meta .foot{display:none}
+    .hero{padding:40px 0 18px}
+    .lb-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  }
 </style>
 </head>
 <body>
@@ -270,13 +299,12 @@ const html = `<!DOCTYPE html>
     card.innerHTML =
       '<div class="thumb">' +
         '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 封面" />' +
-        '<span class="count">' + s.refs + ' 参考</span>' +
-        '<div class="veil"><span class="cta"><span class="dot"></span>查看封面大图</span></div>' +
+        '<div class="veil"><span class="cta">查看封面大图</span></div>' +
       '</div>' +
       '<div class="meta">' +
         '<h3>' + s.name + ' <span class="en">' + s.id + '</span></h3>' +
-        '<p>' + s.desc + '</p>' +
-        '<div class="foot"><span class="refcount">'+ s.refs +' 张参考图</span><span class="view">点击看大图 →</span></div>' +
+        '<p>' + (s.usecase || s.desc) + '</p>' +
+        '<div class="foot"><span class="view">点击看大图 →</span></div>' +
       '</div>';
     card.addEventListener('click', () => openCover(s));
     grid.appendChild(card);
