@@ -21,12 +21,25 @@ const REF_DST   = path.join(SITE_ROOT, 'assets', 'source');
 
 // --- 工具函数 ---
 const exts = ['.jpg', '.jpeg', '.png', '.webp', '.JPG', '.PNG'];
+// 优先选用版本号最高的「已确认示意图」：亮彩字刊-v4.png > 亮彩字刊.png
+// （技能 README 里 vN 变体才是最新确认版，如 清爽涂鸦-v2 / 暖调随记-v2）
+function coverVersion(baseName, styleName) {
+  if (baseName === styleName) return 0;
+  const m = baseName.match(/^(.*)-v(\d+)$/);
+  if (m && m[1] === styleName) return parseInt(m[2], 10);
+  return -1;
+}
 function findCover(name) {
-  for (const e of exts) {
-    const p = path.join(COVER_SRC, name + e);
-    if (fs.existsSync(p)) return p;
+  let files = [];
+  try { files = fs.readdirSync(COVER_SRC); } catch (e) { return null; }
+  let best = null, bestV = -1;
+  for (const f of files) {
+    const ext = path.extname(f);
+    if (!exts.includes(ext)) continue;
+    const v = coverVersion(path.basename(f, ext), name);
+    if (v > bestV) { bestV = v; best = f; }
   }
-  return null;
+  return best ? path.join(COVER_SRC, best) : null;
 }
 function naturalKey(s) {
   return s.replace(/(\d+)/g, m => m.padStart(12, '0'));
