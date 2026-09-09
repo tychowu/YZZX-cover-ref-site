@@ -295,7 +295,7 @@ const html = `<!DOCTYPE html>
   STYLES.forEach((s, i) => {
     const card = document.createElement('article');
     card.className = 'card'; card.style.setProperty('--i', i);
-    const descHtml = (s.usecase || s.desc).split('\n').map(function(l){ return '<span class="ln">' + l + '</span>'; }).join('');
+    const descHtml = (s.useCase || s.desc).split('\\n').map(function(l){ return '<span class="ln">' + l + '</span>'; }).join('');
     card.innerHTML =
       '<div class="thumb">' +
         '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 封面" />' +
