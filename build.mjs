@@ -169,6 +169,20 @@ const html = `<!DOCTYPE html>
   .tile:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)} .tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.3,1)}
   .tile:hover img{transform:scale(1.05)} .tile .num{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;color:#fff;background:rgba(20,23,28,.7);padding:3px 8px;border-radius:999px}
   .lb-note{padding:16px 20px 20px;color:var(--ink-3);font-size:12.5px}
+  .cover{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px}
+  .cover.open{display:flex} .cover-backdrop{position:absolute;inset:0;background:rgba(12,16,24,.86);backdrop-filter:blur(8px);opacity:0;transition:opacity .3s}
+  .cover.show .cover-backdrop{opacity:1}
+  .cover-dialog{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;max-height:94vh;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.7,.3,1),opacity .3s}
+  .cover.show .cover-dialog{transform:translateY(0) scale(1);opacity:1}
+  .cover-head{width:min(560px,92vw);display:flex;align-items:center;gap:12px;padding:0 2px 12px}
+  .cover-head .tt{display:flex;flex-direction:column} .cover-head .tt b{font-size:18px;letter-spacing:.5px;color:#fff} .cover-head .tt span{font-size:12px;color:rgba(255,255,255,.7)}
+  .cover-head .grow{flex:1} .cover-close{width:38px;height:38px;border:none;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:22px;line-height:1;cursor:pointer;transition:.25s}
+  .cover-close:hover{background:var(--grad);transform:rotate(90deg)}
+  .cover-img{max-height:62vh;width:auto;max-width:min(560px,92vw);border-radius:16px;box-shadow:0 30px 90px rgba(0,0,0,.6);display:block;cursor:zoom-in;transition:transform .4s cubic-bezier(.2,.7,.3,1)}
+  .cover-img:hover{transform:scale(1.02)}
+  .cover-enter{margin-top:18px;display:inline-flex;flex-direction:column;align-items:center;gap:7px;border:none;background:transparent;color:#fff;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:2px;font-family:inherit}
+  .cover-enter .arrow{width:44px;height:44px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 8px 26px rgba(47,107,255,.45);transition:transform .3s}
+  .cover-enter:hover .arrow{transform:translateY(6px)}
   .zoom{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,14,22,.92);backdrop-filter:blur(8px);cursor:zoom-out;padding:24px}
   .zoom.open{display:flex;animation:zoomfade .25s ease} @keyframes zoomfade{from{opacity:0}to{opacity:1}}
   .zoom img{max-width:94vw;max-height:92vh;border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.6);display:block}
@@ -192,7 +206,7 @@ const html = `<!DOCTYPE html>
     <section class="hero">
       <span class="eyebrow"><i></i>言直在线 · 已确认封面风格</span>
       <h1>先看<span class="g">效果</span>，再定风格</h1>
-      <p>这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意一张封面，即可平铺查看该风格的学习参考图，方便你在生成前快速挑选最合适的方向。</p>
+      <p>这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意封面先看大图，再点底部箭头进入该风格的学习参考图合集，方便你在生成前快速挑选方向。</p>
       <div class="stats">
         <div class="stat"><b>${finalStyles.length}</b><span>已确认风格</span></div>
         <div class="stat"><b>${totalRefs}</b><span>学习参考图</span></div>
@@ -202,7 +216,7 @@ const html = `<!DOCTYPE html>
 
     <div class="section-head">
       <h2>全部风格</h2>
-      <small>默认展示「已确认示意图」，点开平铺查看参考图</small>
+      <small>点开封面看大图，再进入参考图合集</small>
     </div>
 
     <section class="grid" id="grid"></section>
@@ -229,6 +243,22 @@ const html = `<!DOCTYPE html>
     </div>
   </div>
 
+  <div class="cover" id="cover" aria-hidden="true">
+    <div class="cover-backdrop" id="coverBackdrop"></div>
+    <div class="cover-dialog" role="dialog" aria-modal="true">
+      <div class="cover-head">
+        <div class="tt"><b id="coverName">风格名称</b><span id="coverEn">style-id</span></div>
+        <div class="grow"></div>
+        <button class="cover-close" id="coverClose" aria-label="关闭">×</button>
+      </div>
+      <img class="cover-img" id="coverImg" src="" alt="" />
+      <button class="cover-enter" id="coverEnter">
+        <span>点开看参考</span>
+        <span class="arrow">↓</span>
+      </button>
+    </div>
+  </div>
+
   <div class="zoom" id="zoom"><img id="zoomImg" src="" alt="" /></div>
 
 <script>
@@ -239,16 +269,16 @@ const html = `<!DOCTYPE html>
     card.className = 'card'; card.style.setProperty('--i', i);
     card.innerHTML =
       '<div class="thumb">' +
-        '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 已确认示意图" />' +
+        '<img loading="lazy" src="assets/covers/' + s.id + '.jpg" alt="' + s.name + ' 封面" />' +
         '<span class="count">' + s.refs + ' 参考</span>' +
-        '<div class="veil"><span class="cta"><span class="dot"></span>查看 ' + s.refs + ' 张参考图</span></div>' +
+        '<div class="veil"><span class="cta"><span class="dot"></span>查看封面大图</span></div>' +
       '</div>' +
       '<div class="meta">' +
         '<h3>' + s.name + ' <span class="en">' + s.id + '</span></h3>' +
         '<p>' + s.desc + '</p>' +
-        '<div class="foot"><span>已确认示意图</span><span class="view">点开看参考 →</span></div>' +
+        '<div class="foot"><span class="refcount">'+ s.refs +' 张参考图</span><span class="view">点击看大图 →</span></div>' +
       '</div>';
-    card.addEventListener('click', () => openLightbox(s));
+    card.addEventListener('click', () => openCover(s));
     grid.appendChild(card);
   });
 
@@ -257,7 +287,7 @@ const html = `<!DOCTYPE html>
         lbGrid = document.getElementById('lbGrid'), lbNote = document.getElementById('lbNote');
   function openLightbox(s){
     lbName.textContent = s.name; lbEn.textContent = s.id; lbTag.textContent = s.refs + ' 张参考图';
-    lbNote.textContent = '以上为「' + s.name + '」的学习参考图（首页展示的已确认示意图不在此重复）。点击任意一张可放大查看。';
+    lbNote.textContent = '以上为「' + s.name + '」的学习参考图，点击任意一张可放大查看。';
     lbGrid.innerHTML = '';
     for (let n = 1; n <= s.refs; n++){
       const src = 'assets/source/' + s.id + '/' + n + '.jpg';
@@ -269,16 +299,38 @@ const html = `<!DOCTYPE html>
     lb.classList.add('open'); requestAnimationFrame(() => lb.classList.add('show'));
     lb.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden';
   }
-  function closeLightbox(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); document.body.style.overflow = ''; setTimeout(() => lb.classList.remove('open'), 280); }
+  function closeLightbox(){ lb.classList.remove('show'); lb.setAttribute('aria-hidden','true'); setTimeout(() => lb.classList.remove('open'), 280); if (!cover.classList.contains('open')) document.body.style.overflow = ''; }
   document.getElementById('lbClose').addEventListener('click', closeLightbox);
   document.getElementById('lbBackdrop').addEventListener('click', closeLightbox);
+
+  const cover = document.getElementById('cover'),
+        coverName = document.getElementById('coverName'),
+        coverEn = document.getElementById('coverEn'),
+        coverImg = document.getElementById('coverImg');
+  let coverStyle = null;
+  function openCover(s){
+    coverStyle = s;
+    coverName.textContent = s.name; coverEn.textContent = s.id;
+    coverImg.src = 'assets/covers/' + s.id + '.jpg'; coverImg.alt = s.name + ' 封面';
+    cover.classList.add('open'); requestAnimationFrame(() => cover.classList.add('show'));
+    cover.setAttribute('aria-hidden','false'); document.body.style.overflow = 'hidden';
+  }
+  function closeCover(){
+    cover.classList.remove('show'); cover.setAttribute('aria-hidden','true');
+    setTimeout(() => cover.classList.remove('open'), 280);
+    if (!lb.classList.contains('open')) document.body.style.overflow = '';
+  }
+  document.getElementById('coverClose').addEventListener('click', closeCover);
+  document.getElementById('coverBackdrop').addEventListener('click', closeCover);
+  document.getElementById('coverEnter').addEventListener('click', () => { if (coverStyle) openLightbox(coverStyle); });
+  coverImg.addEventListener('click', () => openZoom(coverImg.src, coverName.textContent + ' 封面'));
 
   const zoom = document.getElementById('zoom'), zoomImg = document.getElementById('zoomImg');
   function openZoom(src, alt){ zoomImg.src = src; zoomImg.alt = alt; zoom.classList.add('open'); }
   function closeZoom(){ zoom.classList.remove('open'); }
   zoom.addEventListener('click', closeZoom);
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape'){ if (zoom.classList.contains('open')) closeZoom(); else if (lb.classList.contains('open')) closeLightbox(); }
+    if (e.key === 'Escape'){ if (zoom.classList.contains('open')) closeZoom(); else if (lb.classList.contains('open')) closeLightbox(); else if (cover.classList.contains('open')) closeCover(); }
   });
 </script>
 </body>
