@@ -19,6 +19,12 @@ const REF_SRC   = path.join(STYLE_DIR, 'source-references');
 const COVER_DST = path.join(SITE_ROOT, 'assets', 'covers');
 const REF_DST   = path.join(SITE_ROOT, 'assets', 'source');
 
+// 每次构建前清空输出目录：技能侧删除参考图后，旧编号文件不会自动消失，
+// 会残留在 assets/source/<id>/ 成为无人引用的孤儿文件（且会被误提交）。
+for (const dir of [COVER_DST, REF_DST]) {
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 // --- 工具函数 ---
 const exts = ['.jpg', '.jpeg', '.png', '.webp', '.JPG', '.PNG'];
 // 优先选用版本号最高的「已确认示意图」：亮彩字刊-v4.png > 亮彩字刊.png
