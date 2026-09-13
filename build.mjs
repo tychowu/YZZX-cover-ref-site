@@ -231,6 +231,22 @@ const html = `<!DOCTYPE html>
   .zoom{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,14,22,.92);backdrop-filter:blur(8px);cursor:zoom-out;padding:24px}
   .zoom.open{display:flex;animation:zoomfade .25s ease} @keyframes zoomfade{from{opacity:0}to{opacity:1}}
   .zoom img{max-width:94vw;max-height:92vh;border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.6);display:block}
+  .pwd{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:24px}
+  .pwd.open{display:flex} .pwd-backdrop{position:absolute;inset:0;background:rgba(12,16,24,.82);backdrop-filter:blur(8px);opacity:0;transition:opacity .3s}
+  .pwd.show .pwd-backdrop{opacity:1}
+  .pwd-dialog{position:relative;z-index:2;width:min(380px,92vw);background:#fff;border-radius:22px;box-shadow:0 40px 120px rgba(0,0,0,.5);padding:30px 28px;text-align:center;transform:translateY(24px) scale(.97);opacity:0;transition:transform .35s cubic-bezier(.2,.7,.3,1),opacity .3s}
+  .pwd.show .pwd-dialog{transform:translateY(0) scale(1);opacity:1}
+  .pwd-dialog h3{margin:0 0 6px;font-size:19px;letter-spacing:.5px}
+  .pwd-dialog p{margin:0 0 18px;color:var(--ink-3);font-size:13px}
+  .pwd-dialog input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font-size:16px;outline:none;transition:border-color .25s;font-family:inherit}
+  .pwd-dialog input:focus{border-color:var(--blue)}
+  .pwd-err{min-height:18px;color:#e23b3b;font-size:13px;margin-top:10px;font-weight:600}
+  .pwd-actions{display:flex;gap:10px;margin-top:6px}
+  .pwd-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.25s}
+  .pwd-submit{color:#fff;background:var(--grad)}
+  .pwd-submit:hover{filter:brightness(1.06)}
+  .pwd-cancel{background:var(--bg-2);color:var(--ink-2)}
+  .pwd-cancel:hover{background:var(--line)}
   footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--ink-3);font-size:13px}
   footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
   footer img{height:32px;mix-blend-mode:multiply}
@@ -259,7 +275,7 @@ const html = `<!DOCTYPE html>
     <section class="hero">
       <span class="eyebrow"><i></i>言直在线 · 已确认封面风格</span>
       <h1>先看<span class="g">效果</span>，再定风格</h1>
-      <p>这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意封面先看大图，再点底部箭头进入该风格的学习参考图合集，方便你在生成前快速挑选方向。</p>
+      <p>这里收录了 YZZX-cover 技能已经通过测试并确认的各种封面风格。点开任意封面先看大图，再点底部箭头进入该风格的学习参考图合集（参考图需密码查看），方便你在生成前快速挑选方向。</p>
       <div class="stats">
         <div class="stat"><b>${finalStyles.length}</b><span>已确认风格</span></div>
         <div class="stat"><b>${totalRefs}</b><span>学习参考图</span></div>
@@ -269,7 +285,7 @@ const html = `<!DOCTYPE html>
 
     <div class="section-head">
       <h2>全部风格</h2>
-      <small>点开封面看大图，再进入参考图合集</small>
+      <small>点开封面看大图，再进入参考图合集（需密码）</small>
     </div>
 
     <section class="grid" id="grid"></section>
@@ -309,6 +325,20 @@ const html = `<!DOCTYPE html>
         <span>点开看参考</span>
         <span class="arrow">↓</span>
       </button>
+    </div>
+  </div>
+
+  <div class="pwd" id="pwd" aria-hidden="true">
+    <div class="pwd-backdrop" id="pwdBackdrop"></div>
+    <div class="pwd-dialog" role="dialog" aria-modal="true">
+      <h3>参考图查看密码</h3>
+      <p>本页参考图仅限内部查阅，请输入密码</p>
+      <input type="password" id="pwdInput" placeholder="请输入密码" autocomplete="off" />
+      <div class="pwd-err" id="pwdErr"></div>
+      <div class="pwd-actions">
+        <button class="pwd-cancel" id="pwdCancel">取消</button>
+        <button class="pwd-submit" id="pwdSubmit">确认</button>
+      </div>
     </div>
   </div>
 
@@ -374,7 +404,45 @@ const html = `<!DOCTYPE html>
   }
   document.getElementById('coverClose').addEventListener('click', closeCover);
   document.getElementById('coverBackdrop').addEventListener('click', closeCover);
-  document.getElementById('coverEnter').addEventListener('click', () => { if (coverStyle) openLightbox(coverStyle); });
+  document.getElementById('coverEnter').addEventListener('click', () => {
+    if (!coverStyle) return;
+    let unlocked = false;
+    try { unlocked = localStorage.getItem('yzzx_ref_unlocked') === '1'; } catch (e) {}
+    if (unlocked) openLightbox(coverStyle);
+    else openPwdGate(coverStyle);
+  });
+
+  // 参考图密码门：密码 yzzx12345，输入一次后用 localStorage 记住，后续免输。
+  const PWD = 'yzzx12345';
+  const PWD_KEY = 'yzzx_ref_unlocked';
+  const pwd = document.getElementById('pwd'),
+        pwdInput = document.getElementById('pwdInput'),
+        pwdErr = document.getElementById('pwdErr');
+  let pendingStyle = null;
+  function openPwdGate(s){
+    pendingStyle = s;
+    pwdErr.textContent = '';
+    pwdInput.value = '';
+    pwd.classList.add('open'); requestAnimationFrame(() => pwd.classList.add('show'));
+    setTimeout(() => pwdInput.focus(), 60);
+  }
+  function closePwdGate(){ pwd.classList.remove('show'); setTimeout(() => pwd.classList.remove('open'), 280); }
+  function submitPwd(){
+    if (pwdInput.value.trim() === PWD){
+      try { localStorage.setItem(PWD_KEY, '1'); } catch (e) {}
+      closePwdGate();
+      if (pendingStyle) openLightbox(pendingStyle);
+      pendingStyle = null;
+    } else {
+      pwdErr.textContent = '密码错误，请重试';
+      pwdInput.value = '';
+      pwdInput.focus();
+    }
+  }
+  document.getElementById('pwdSubmit').addEventListener('click', submitPwd);
+  document.getElementById('pwdCancel').addEventListener('click', closePwdGate);
+  document.getElementById('pwdBackdrop').addEventListener('click', closePwdGate);
+  pwdInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitPwd(); });
   coverImg.addEventListener('click', () => openZoom(coverImg.src, coverName.textContent + ' 封面'));
 
   const zoom = document.getElementById('zoom'), zoomImg = document.getElementById('zoomImg');
